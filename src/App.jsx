@@ -6,6 +6,8 @@ import Stats from "./components/Stats/Stats";
 import Controls from "./components/Controls/Controls";
 import Results from "./components/Results/Results";
 import { getText } from "./utils/words";
+import diffChars from "./utils/diffChars";
+import computeStats from "./utils/computeStats";
 import "./App.css";
 
 const DEFAULT_MODE = "time";
@@ -17,18 +19,75 @@ function App() {
   const [mode, setMode] = useState(DEFAULT_MODE);
   const [timeLimit, setTimeLimit] = useState(DEFAULT_TIME);
   const [wordsLimit, setWordsLimit] = useState(DEFAULT_WORDS);
-  const [phase, setPhase] = useState("setup");
+
+  const [phase, setPhase] = useState("setup"); // 'setup' | 'running' | 'finished'
+
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState("");
+
   const [startTime, setStartTime] = useState(null);
   const [timeLeft, setTimeLeft] = useState(DEFAULT_TIME);
   const [, setTick] = useState(0);
 
-  // ← после всех useState
-  const wordsTyped = input.trim() === "" ? 0 : input.trim().split(/\s+/).length;
+  const [totalCorrect, setTotalCorrect] = useState(0);
+  const [totalIncorrect, setTotalIncorrect] = useState(0);
 
-  // ---- Загрузка текста ----
+  const resetProgress = useCallback(() => {
+    setInput("");
+    setTotalCorrect(0);
+    setTotalIncorrect(0);
+    setStartTime(null);
+    setTimeLeft(timeLimit);
+  }, [timeLimit]);
+
+  const startTest = useCallback(() => {
+    resetProgress();
+    setPhase("running");
+  }, [resetProgress]);
+
+  const goToSetup = useCallback(
+    ({ keepText } = { keepText: true }) => {
+      resetProgress();
+      if (!keepText) setText("");
+      setPhase("setup");
+    },
+    [resetProgress],
+  );
+
+  const handleNext = useCallback(() => {
+    goToSetup({ keepText: false });
+  }, [goToSetup]);
+
+  const handleFinish = useCallback(() => {
+    goToSetup({ keepText: true });
+  }, [goToSetup]);
+
+  const handleModeChange = useCallback(
+    (newMode) => {
+      setMode(newMode);
+      goToSetup({ keepText: false });
+    },
+    [goToSetup],
+  );
+
+  const handleTimeChange = useCallback(
+    (t) => {
+      setTimeLimit(t);
+      setTimeLeft(t);
+      goToSetup({ keepText: true });
+    },
+    [goToSetup],
+  );
+
+  const handleWordsChange = useCallback(
+    (w) => {
+      setWordsLimit(w);
+      goToSetup({ keepText: false });
+    },
+    [goToSetup],
+  );
+
   useEffect(() => {
     if (phase !== "setup") return;
     if (text) return;
@@ -47,10 +106,8 @@ function App() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, mode, wordsLimit]);
 
-  // ---- Таймер ----
   useEffect(() => {
     if (phase !== "running") return;
     if (mode !== "time") return;
@@ -67,89 +124,47 @@ function App() {
     return () => clearInterval(interval);
   }, [phase, mode, startTime, timeLimit]);
 
-  // ---- Завершение в words (по словам) ----
   useEffect(() => {
     if (phase !== "running") return;
     if (mode !== "words") return;
-    if (wordsTyped >= wordsLimit) setPhase("finished");
-  }, [wordsTyped, phase, mode, wordsLimit]);
+    if (text.length > 0 && input.length >= text.length) setPhase("finished");
+  }, [input, phase, mode, text.length]);
 
-  // ---- Ввод ----
-  function handleInput(e) {
-    if (phase !== "running") return;
-    const value = e.target.value;
+  const handleInput = useCallback(
+    (e) => {
+      if (phase !== "running") return;
+      const value = e.target.value;
+      const prev = input;
 
-    if (!startTime) setStartTime(Date.now());
+      if (!startTime) setStartTime(Date.now());
 
-    if (mode === "words") {
-      const typedNow =
-        value.trim() === "" ? 0 : value.trim().split(/\s+/).length;
-      if (typedNow > wordsLimit) return;
-    }
-    setInput(value);
-  }
+      if (mode === "words" && value.length > text.length) return;
 
-  const handleStart = useCallback(() => {
-    setInput("");
-    setStartTime(null);
-    setTimeLeft(timeLimit);
-    setPhase("running");
-  }, [timeLimit]);
+      if (value.length <= prev.length) {
+        setInput(value);
+        return;
+      }
 
-  const handleRestart = useCallback(() => {
-    setInput("");
-    setStartTime(null);
-    setTimeLeft(timeLimit);
-    setPhase("running");
-  }, [timeLimit]);
+      const { correct, incorrect } = diffChars(text, prev, value);
+      if (correct) setTotalCorrect((x) => x + correct);
+      if (incorrect) setTotalIncorrect((x) => x + incorrect);
 
-  // ← не грузим текст вручную, только сбрасываем и переключаем фазу
-  const handleNext = useCallback(() => {
-    setInput("");
-    setStartTime(null);
-    setTimeLeft(timeLimit);
-    setText(""); // → useEffect перезагрузит
-    setPhase("setup");
-  }, [timeLimit]);
+      setInput(value);
+    },
+    [phase, input, startTime, mode, text],
+  );
 
-  const handleFinish = useCallback(() => {
-    setInput("");
-    setStartTime(null);
-    setTimeLeft(timeLimit);
-    setPhase("setup");
-  }, [timeLimit]);
-
-  const handleModeChange = (newMode) => {
-    setMode(newMode);
-    setPhase("setup");
-    setInput("");
-    setStartTime(null);
-    setText(""); // ← сброс, чтобы текст перезагрузился
-  };
-
-  const handleTimeChange = (t) => {
-    setTimeLimit(t);
-    setTimeLeft(t);
-    setPhase("setup");
-    setInput("");
-    setStartTime(null);
-  };
-
-  const handleWordsChange = (w) => {
-    setWordsLimit(w);
-    setPhase("setup");
-    setInput("");
-    setStartTime(null);
-    setText(""); // ← сброс, чтобы текст перезагрузился
-  };
-
-  const { correct, incorrect } = countChars(text, input);
   const elapsed = startTime
     ? mode === "time"
       ? Math.min(timeLimit, (Date.now() - startTime) / 1000)
       : (Date.now() - startTime) / 1000
     : 0;
-  const totalTyped = input.length;
+
+  const { totalTyped, wpm, accuracy } = computeStats({
+    correct: totalCorrect,
+    incorrect: totalIncorrect,
+    elapsed,
+  });
 
   if (loading && !text) {
     return <div className="app__loading">Загрузка текста...</div>;
@@ -158,6 +173,7 @@ function App() {
   return (
     <div className="app">
       <Header />
+
       <main className="app__main">
         {phase === "setup" && (
           <ModeSelector
@@ -167,7 +183,7 @@ function App() {
             onModeChange={handleModeChange}
             onTimeChange={handleTimeChange}
             onWordsChange={handleWordsChange}
-            onStart={handleStart}
+            onStart={startTest}
           />
         )}
 
@@ -176,11 +192,11 @@ function App() {
             <Stats
               mode={mode}
               timeLeft={timeLeft}
-              currentIndex={mode === "words" ? wordsTyped : input.length}
-              totalLength={mode === "words" ? wordsLimit : text.length}
+              currentIndex={input.length}
+              totalLength={text.length}
             />
             <TypingArea text={text} input={input} onInput={handleInput} />
-            <Controls onRestart={handleRestart} onFinish={handleFinish} />
+            <Controls onRestart={startTest} onFinish={handleFinish} />
           </>
         )}
 
@@ -190,31 +206,19 @@ function App() {
               mode={mode}
               timeLimit={timeLimit}
               wordsLimit={wordsLimit}
-              elapsed={mode === "time" ? timeLimit : elapsed}
-              correct={correct}
-              incorrect={incorrect}
+              elapsed={elapsed}
+              correct={totalCorrect}
+              incorrect={totalIncorrect}
               totalTyped={totalTyped}
+              wpm={wpm}
+              accuracy={accuracy}
             />
-            <Controls onRestart={handleRestart} onNext={handleNext} />
+            <Controls onRestart={startTest} onNext={handleNext} />
           </>
         )}
       </main>
     </div>
   );
-}
-
-function countChars(text, input) {
-  const min = Math.min(text.length, input.length);
-  let correct = 0;
-  let incorrect = 0;
-  for (let i = 0; i < min; i++) {
-    if (input[i] === text[i]) correct++;
-    else incorrect++;
-  }
-  if (input.length > text.length) {
-    incorrect += input.length - text.length;
-  }
-  return { correct, incorrect };
 }
 
 export default App;

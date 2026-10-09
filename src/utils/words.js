@@ -1,9 +1,6 @@
 import fallbackWords from "../data/fallbackWords.json";
 import fetchText from "../api/fetchText.js";
 
-/**
- * Из локального набора предложений достаёт одно случайное.
- */
 export function getLocalSentence() {
   const list = fallbackWords.sentences;
   return list[Math.floor(Math.random() * list.length)];
