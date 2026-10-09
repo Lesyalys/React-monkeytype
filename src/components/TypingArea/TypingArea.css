@@ -1,0 +1,77 @@
+.typing {
+  width: 100%;
+  max-width: 900px;
+  cursor: text;
+  position: relative;
+  min-height: 140px;
+  padding: 8px 0;
+}
+
+.typing__text {
+  font-size: 30px;
+  line-height: 1.7;
+  color: #646669;
+  user-select: none;
+  word-break: break-word;
+  white-space: pre-wrap;
+  letter-spacing: 0.2px;
+}
+
+.typing--preview .typing__text {
+  color: #4a4d52;
+}
+
+.typing__char {
+  transition: color 0.1s ease;
+}
+
+/* Правильный символ — белый */
+.typing__char--correct {
+  color: #d1d0c5;
+}
+
+/* Неправильный — красный с подчёркиванием */
+.typing__char--incorrect {
+  color: #ca4754;
+  text-decoration: underline;
+  text-decoration-color: #ca4754;
+  text-underline-offset: 3px;
+}
+
+/* Лишний (тёмно-красный) */
+.typing__char--extra {
+  color: #7a1f28;
+  background: rgba(122, 31, 40, 0.25);
+  text-decoration: underline;
+  text-decoration-color: #7a1f28;
+  text-underline-offset: 3px;
+}
+
+/* Курсор */
+.typing__char--active {
+  color: #646669;
+  border-left: 2px solid #e2b714;
+  margin-left: -2px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    border-color: #e2b714;
+  }
+  51%,
+  100% {
+    border-color: transparent;
+  }
+}
+
+.typing__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+}

@@ -1,0 +1,26 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 20px 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  gap: 16px;
+}
+
+/* Логотип остаётся наверху */
+.app > .header {
+  flex-shrink: 0;
+}
+
+/* Основной блок занимает всё оставшееся место и центрирует содержимое */
+.app__main {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* ← вертикальное центрирование */
+  gap: 28px;
+}

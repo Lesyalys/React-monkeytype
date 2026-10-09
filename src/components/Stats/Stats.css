@@ -1,0 +1,34 @@
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 900px;
+  margin-top: 12px;
+}
+
+.stats__counter {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.stats__counter-current {
+  color: #e2b714;
+}
+
+.stats__counter-sep {
+  color: #646669;
+  margin: 0 2px;
+}
+
+.stats__counter-total {
+  color: #646669;
+}
+
+.stats__timer {
+  font-size: 15px;
+  color: #e2b714;
+  font-weight: 600;
+  margin-left: auto;
+}

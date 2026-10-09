@@ -1,0 +1,34 @@
+.timer {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.timer__bar {
+  flex: 1;
+  height: 4px;
+  background: #2c2e31;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.timer__bar-fill {
+  height: 100%;
+  background: #e2b714;
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.timer__text {
+  font-size: 20px;
+  color: #646669;
+  min-width: 56px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.timer__text--active {
+  color: #e2b714;
+}

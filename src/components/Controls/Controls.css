@@ -1,0 +1,43 @@
+.controls__btn {
+  background: #2c2e31;
+  border: none;
+  color: #d1d0c5;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 10px 18px;
+  border-radius: 8px;
+  transition:
+    color 0.2s,
+    background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.controls__btn:hover {
+  color: #e2b714;
+  background: #363940;
+}
+
+/* Специально для «Закончить» — приглушённо-красный оттенок */
+.controls__btn[data-variant="finish"]:hover {
+  color: #ca4754;
+  background: rgba(202, 71, 84, 0.1);
+}
+
+.controls__btn--primary {
+  background: #e2b714;
+  color: #2c2e31;
+  font-weight: 600;
+}
+
+.controls__btn--primary:hover {
+  background: #f0c522;
+  color: #2c2e31;
+}
+
+.controls__icon {
+  font-size: 16px;
+  line-height: 1;
+}

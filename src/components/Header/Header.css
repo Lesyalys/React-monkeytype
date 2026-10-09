@@ -1,0 +1,17 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.header__icon {
+  display: block;
+}
+
+.header__title {
+  font-size: 26px;
+  font-weight: 600;
+  color: #d1d0c5;
+  letter-spacing: 0.5px;
+}

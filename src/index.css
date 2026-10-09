@@ -1,0 +1,18 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: "Roboto Mono", "Courier New", monospace;
+  background-color: #282c34;
+  color: #d1d0c5;
+  -webkit-font-smoothing: antialiased;
+}
